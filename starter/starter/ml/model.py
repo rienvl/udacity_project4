@@ -67,5 +67,5 @@ def inference(model, X):
     predict : np.array
         Predictions from the model.
     """
-    predict = model.predict(X)  # .reshape(-1, 1))
+    predict = model.predict(X)
     return predict

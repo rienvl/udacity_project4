@@ -4,10 +4,8 @@ import logging
 import pandas as pd
 import pickle
 from sklearn.model_selection import train_test_split
-from starter.starter.ml.data import process_data
-import starter.starter.ml.model as mdl
-
-# Add the necessary imports for the starter code.
+from .ml.data import process_data
+from .ml import model as mdl
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
@@ -28,6 +26,27 @@ def load_data(data_name='census.csv'):
     data = pd.read_csv(full_input_path)
     logging.info("OK - train_model.py: loaded training data containing {} rows".format(data.shape[0]))
     return data
+
+
+def clean_data(data_df):
+    '''
+    this function replaces "?" data with nans and then removes
+    rows with any nan values from the input dataframe
+    Parameters
+    ----------
+    data_df: input dataframe
+    Returns data_df: cleaned dataframe
+    -------
+    '''
+    # 2-steps: (1) replace "?" by nan, (2) remove rows with nans
+    n_rows_orig = data_df.shape[0]
+    data_df = data_df.replace('?', np.nan)
+    data_df = data_df.dropna()
+    n_rows = data_df.shape[0]
+    percentage_missing_data = int(100 * float(n_rows_orig-n_rows) / (float(n_rows_orig)) + 0.5)
+    logging.info("OK - train_model.py: removed {:d}% missing data".format(percentage_missing_data))
+
+    return data_df
 
 
 def save_model(model, model_name='trainedmodel.pkl'):
@@ -64,13 +83,7 @@ def train_model(data_name='census.csv'):
     data = load_data(data_name=data_name)
 
     # remove rows with missing data
-    # 2-steps: (1) replace "?" by nan, (2) remove rows with nans
-    n_rows_orig = data.shape[0]
-    data = data.replace('?', np.nan)
-    data = data.dropna()
-    n_rows = data.shape[0]
-    percentage_missing_data = int(100 * float(n_rows_orig-n_rows) / (float(n_rows_orig)) + 0.5)
-    logging.info("OK - train_model.py: removed {:d}% missing data".format(percentage_missing_data))
+    data = clean_data(data)
 
     # Optional enhancement, use K-fold cross validation instead of a train-test split.
     test_size = 0.20
@@ -109,11 +122,11 @@ def train_model(data_name='census.csv'):
 
     # model inferences
     predictions = mdl.inference(model, X_test)
-    logging.info("OK - train_model.py - inference")
+    logging.info("OK - train_model.py - inference completed")
 
     # validates the trained machine learning model using precision, recall, and f_beta
     f_beta, precision, recall = mdl.compute_model_metrics(y_test, predictions)
-    logging.info("OK - train_model.py - validation:\n                             "
+    logging.info("OK - train_model.py - validation completed:\n                             "
                  "f_beta = {:.4f},   precision = {:.4f},   recall = {:.4f}".format(f_beta, precision, recall))
 
     # save a model as trainedmodel.pkl
