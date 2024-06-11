@@ -2,7 +2,6 @@ import os
 import numpy as np
 import logging
 import pandas as pd
-import pickle
 from sklearn.model_selection import train_test_split
 from .ml.data import process_data
 from .ml import model as mdl
@@ -12,7 +11,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
 logger = logging.getLogger()
 
 
-def load_data(data_name='census.csv'):
+def load_data(parent_path='~/git/udacity_project_4/'):
     '''
     this function loads the data file specified by data_name and returns the data as a DataFrame
     Parameters
@@ -21,9 +20,11 @@ def load_data(data_name='census.csv'):
     Returns data: pandas DataFrame
     -------
     '''
-    # read in finaldata.csv using the pandas module
-    full_input_path = os.path.join('starter', 'data', data_name)
-    data = pd.read_csv(full_input_path)
+    full_path = os.path.join(parent_path, 'starter', 'data', 'census.csv')
+    if not os.path.isfile(full_path):
+        print('WARNING Is not file: {}'.format(full_path))
+    # read in data using the pandas module
+    data = pd.read_csv(full_path)
     logging.info("OK - train_model.py: loaded training data containing {} rows".format(data.shape[0]))
     return data
 
@@ -65,7 +66,7 @@ def train_model(data_name='census.csv'):
     -------
     '''
     # load the data file specified by data_name and returns the data as a DataFrame
-    data = load_data(data_name=data_name)
+    data = load_data(parent_path='~/git/udacity_project_4/')
 
     # remove rows with missing data
     data = clean_data(data)

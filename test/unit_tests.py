@@ -2,7 +2,6 @@ import os
 import pytest
 import pandas as pd
 import numpy as np
-import pickle
 import logging
 from ..starter.starter.ml import model as mdl
 from ..starter.starter.ml.data import process_data
@@ -131,6 +130,26 @@ def test_compute_model_metrics(model_encoder_lb, clean_test_data):
     assert (0 < precision < 1.0), 'compute_model_metrics() returned unrealistic value for precision'
     assert (0 < recall < 1.0), 'compute_model_metrics() returned unrealistic value for recall'
 
+
+def test_performance_on_slices(model_encoder_lb, clean_test_data):
+    model = model_encoder_lb[0]
+    encoder = model_encoder_lb[1]
+    lb = model_encoder_lb[2]
+    X_test, y_test, _, _ = process_data(
+        clean_test_data, categorical_features=cat_features, label="salary", training=False, encoder=encoder, lb=lb
+    )
+    logging.info("OK - test_performance_on_slices.py: processed data")
+
+    f1_score_list = -1
+    slice_cat = -1
+    try:
+        f1_score_list, slice_cat = mdl.get_model_performance_on_slices(X_test, y_test, cat_features, model, encoder)
+    except:
+        logging.info("ERROR - unit_tests.py: mdl.get_model_performance_on_slices() returned error")
+        pytest.fail("test_performance_on_slices()")
+
+    assert isinstance(f1_score_list, list), 'get_model_performance_on_slices() returned wrong type for f1_score_list'
+    assert isinstance(slice_cat, object), 'get_model_performance_on_slices() returned wrong type for slice_cat'
 
 # def test_slice_averages(clean_test_data):
 #     """ Test to see if the mean per categorical slice is in the range 1.5 to 2.5 """

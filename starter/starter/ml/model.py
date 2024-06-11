@@ -39,24 +39,29 @@ def train_model(X_train, y_train):
     return model
 
 
-def load_model():
+def load_model(parent_path='~/git/udacity_project_4/'):
     '''
     this function loads the model and encoder specified by inputs
 
     Returns model, encoder, lb
     -------
     '''
-    full_folder_path = os.path.join(os.getcwd(), 'starter', 'model')
-    # load model
+    full_folder_path = os.path.join(parent_path, 'starter', 'model')
     full_path = os.path.join(full_folder_path, 'trainedmodel.pkl')
+    # load model
+    if not os.path.isfile(full_path):
+        print('WARNING Is not file: {}'.format(full_path))
+
     with open(full_path, 'rb') as file:
         model = pickle.load(file)
     # load encoder
     full_path = os.path.join(full_folder_path, 'trainedencoder.pkl')
+    print(os.path.isfile(full_path))
     with open(full_path, 'rb') as file:
         encoder = pickle.load(file)
     # load encoder
     full_path = os.path.join(full_folder_path, 'trainedlb.pkl')
+    print(os.path.isfile(full_path))
     with open(full_path, 'rb') as file:
         lb = pickle.load(file)
     logging.info("OK - model.py: loaded model, encoder, and lb")
@@ -64,7 +69,7 @@ def load_model():
     return model, encoder, lb
 
 
-def save_model(model, encoder, lb):
+def save_model(model, encoder, lb, parent_path='~/git/udacity_project_4/'):
     '''
     this function saves the input model and encoder as pickle files
     Parameters
@@ -76,7 +81,7 @@ def save_model(model, encoder, lb):
     lb: trained label binarizer
     -------
     '''
-    full_folder_path = os.path.join(os.getcwd(), 'starter', 'model')
+    full_folder_path = os.path.join(parent_path, 'starter', 'model')
     # save model
     full_path = os.path.join(full_folder_path, 'trainedmodel.pkl')
     filehandler = open(full_path, 'wb')
