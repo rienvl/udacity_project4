@@ -110,7 +110,7 @@ def compute_model_metrics(y, predict):
     precision : float
     recall : float
     """
-    f1 = f1_score(y, predict)
+    f1 = f1_score(y, predict, zero_division=np.NaN)
     precision = precision_score(y, predict, zero_division=1)
     recall = recall_score(y, predict, zero_division=1)
     return f1, precision, recall
@@ -134,20 +134,59 @@ def inference(model, X):
     return predict
 
 
-def get_model_performance_on_slices(model, X_val, y_val, cat_features):
-
+def get_model_performance_on_slices(X_val, y_val, cat_features, model, encoder):
+    slice_cat = encoder.get_feature_names_out(cat_features)
+    # X_val.shape[1] := n_continuous + n_categorical
+    n_continuous = X_val.shape[1] - len(slice_cat)
+    print('n_continuous = {},   n_categorical = {}'.format(n_continuous, len(slice_cat)))
     f1_score_list = []
-    # select any 3 features
-    selected_columns = {'MajorAxisLength', 'MinorAxisLength', 'ConvexArea'}
-    for column in selected_columns:
-        print('F1 score for {:15s} slices:  '.format(column), end="")
-        y_val_sub = y_val[X_val[column] < np.mean(X_val[column])]
-        X_val_sub = X_val[X_val[column] < np.mean(X_val[column])]
-        pred_sub = model.predict(X_val_sub)
-        f1_score_list.append(f1_score(y_val_sub, pred_sub))
-        y_val_sub = y_val[X_val[column] >= np.mean(X_val[column])]
-        X_val_sub = X_val[X_val[column] >= np.mean(X_val[column])]
-        pred_sub = model.predict(X_val_sub)
-        f1_score_list.append(f1_score(y_val_sub, pred_sub))
-        print('{:.3f}  and  {:.3f}\n'.format(f1_score_list[-1], f1_score_list[-2]))
-    return
+    for idx, column in enumerate(slice_cat):
+        column_idx = n_continuous + idx
+        f1 = np.NaN  # initialize as nan
+        if np.count_nonzero(X_val[:, column_idx]) > 10:
+            # only compute f1 score if sufficient samples
+            y_val_sub = y_val[X_val[:, column_idx] > 0]
+            X_val_sub = X_val[X_val[:, column_idx] > 0]
+            pred_sub = model.predict(X_val_sub)
+            f1 = f1_score(y_val_sub, pred_sub, zero_division=np.NaN)
+            print('F1 score {:.3f} for slices {}'.format(f1, column))
+        else:
+            print('no reliable score: {}'.format(column))
+
+        f1_score_list.append(f1)
+
+    return f1_score_list, slice_cat
+
+
+if __name__ == '__main__':
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+    from ..train_model import clean_data
+    from .data import process_data
+
+    cat_features = [
+        "workclass",
+        "education",
+        "marital-status",
+        "occupation",
+        "relationship",
+        "race",
+        "sex",
+        "native-country",
+    ]
+
+    # load trained model
+    model, encoder, lb = load_model()
+    # load test data
+    full_input_path = os.path.join('starter', 'data', 'census.csv')
+    data = pd.read_csv(full_input_path)
+    # clean test data
+    data = clean_data(data)
+    # split data
+    train_data, test_data = train_test_split(data, test_size=0.20)
+    # proces the test data
+    X_test, y_test, _, _ = process_data(
+        test_data, categorical_features=cat_features, label="salary", training=False, encoder=encoder, lb=lb
+    )
+    # get model performance on slices
+    get_model_performance_on_slices(X_test, y_test, cat_features, model, encoder)
