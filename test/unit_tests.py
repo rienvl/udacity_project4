@@ -1,6 +1,7 @@
 import os
 import pytest
 import pandas as pd
+import numpy as np
 import pickle
 import logging
 from ..starter.starter.ml import model as mdl
@@ -52,27 +53,25 @@ def clean_test_data(test_data):
 
 
 @pytest.fixture(scope="module")
-def model():
+def model_encoder_lb():
     try:
-        full_model_path = os.path.join(os.getcwd(), './starter', 'model', 'trainedmodel.pkl')
-        with open(full_model_path, 'rb') as file:
-            model = pickle.load(file)
-        logging.info("OK - pytest.py: loaded model")
+        model,  encoder, lb = mdl.load_model()
+        logging.info("OK - pytest.py: loaded model, encoder, and lb")
     except:
         logging.info("ERROR - unit_tests.py: model loading returned error")
-        pytest.fail("fixture model()")
+        pytest.fail("fixture model_encoder()")
 
-    return model
+    return model, encoder, lb
 
 
 def test_load_data(test_data):
     """check if test data has expected number of rows"""
-    assert test_data.shape[0] == 32561
+    assert test_data.shape[0] == 32561, 'test_data has incorrect number of rows'
 
 
 def test_clean_data(clean_test_data):
     """check if clean data step returns the correct number of rows"""
-    assert clean_test_data.shape[0] == 30162
+    assert clean_test_data.shape[0] == 30162, 'clean_data() returned incorrect number of rows'
 
 
 def test_train_model(clean_test_data):
@@ -86,39 +85,57 @@ def test_train_model(clean_test_data):
         logging.info("OK - test_train_model(): model training completed")
         # test if valid model that returns predictions
         predict = model.predict(X_train)
-        assert predict.shape[0] == X_train.shape[0]
+        assert predict.shape[0] == X_train.shape[0], 'train_model() returned output with wrong shape'
     except:
         pytest.fail("test_train_model")
 
 
-def test_inference(model, clean_test_data):
-    X_train, y_train, _, _ = process_data(
-        clean_test_data, categorical_features=cat_features, label="salary", training=True
+def test_inference(model_encoder_lb, clean_test_data):
+    model = model_encoder_lb[0]
+    encoder = model_encoder_lb[1]
+    lb = model_encoder_lb[2]
+    X_test, _, _, _ = process_data(
+        clean_test_data, categorical_features=cat_features, label="salary", training=False, encoder=encoder, lb=lb
     )
     logging.info("OK - test_inference.py: processed data")
 
-    predict = mdl.inference(model, X_train)
+    predict = mdl.inference(model, X_test)
+    assert isinstance(predict[0], np.int64), 'inference() returned wrong type'
+    assert (predict.shape[0] == X_test.shape[0]), 'inference() returned output with wrong shape'
 
-    assert (predict.shape[0] == X_train.shape[0])
 
-
-def test_compute_model_metrics(model, clean_test_data):
-    X_train, y_train, _, _ = process_data(
-        clean_test_data, categorical_features=cat_features, label="salary", training=True
+def test_compute_model_metrics(model_encoder_lb, clean_test_data):
+    model = model_encoder_lb[0]
+    encoder = model_encoder_lb[1]
+    lb = model_encoder_lb[2]
+    X_test, y_test, _, _ = process_data(
+        clean_test_data, categorical_features=cat_features, label="salary", training=False, encoder=encoder, lb=lb
     )
     logging.info("OK - test_compute_model_metrics.py: processed data")
 
-    predict = mdl.inference(model, X_train)
+    predict = mdl.inference(model, X_test)
 
+    f1_score = -1
     precision = -1
     recall = -1
-    f_beta = -1
     try:
-        precision, recall, f_beta = mdl.compute_model_metrics(y_train, predict)
+        f1_score, precision, recall = mdl.compute_model_metrics(y_test, predict)
     except:
         logging.info("ERROR - unit_tests.py: mdl.compute_model_metrics() returned error")
         pytest.fail("test_compute_model_metrics()")
 
-    assert (0 < precision < 1.0)
-    assert (0 < recall < 1.0)
-    assert (0 < f_beta < 1.0)
+    assert isinstance(f1_score, float), 'compute_model_metrics() returned wrong type for f1_score'
+    assert isinstance(precision, float), 'compute_model_metrics() returned wrong type for precision'
+    assert isinstance(recall, float), 'compute_model_metrics() returned wrong type for recall'
+    assert (0 < f1_score < 1.0), 'compute_model_metrics() returned unrealistic value for f1_score'
+    assert (0 < precision < 1.0), 'compute_model_metrics() returned unrealistic value for precision'
+    assert (0 < recall < 1.0), 'compute_model_metrics() returned unrealistic value for recall'
+
+
+# def test_slice_averages(clean_test_data):
+#     """ Test to see if the mean per categorical slice is in the range 1.5 to 2.5 """
+#     for cat_feat in cat_features:
+#         avg_value = clean_test_data[clean_test_data[cat_feat] == cat_feat]["numeric_feat"].mean()
+#         assert (
+#             2.5 > avg_value > 1.5
+#         ), f"For {cat_feat}, average of {avg_value} not between 2.5 and 3.5."

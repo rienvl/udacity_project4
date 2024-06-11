@@ -49,21 +49,6 @@ def clean_data(data_df):
     return data_df
 
 
-def save_model(model, model_name='trainedmodel.pkl'):
-    '''
-    this function save the input model to as a pickle file
-    Parameters
-    ----------
-    model: input model
-    model_name: name of the output pkl file
-    -------
-    '''
-    full_output_path = os.path.join('starter', 'model', model_name)
-    filehandler = open(full_output_path, 'wb')
-    pickle.dump(model, filehandler)
-    logging.info("OK - train_model.py: stored model in {}".format(full_output_path))
-
-
 def train_model(data_name='census.csv'):
     '''
     this function
@@ -125,12 +110,12 @@ def train_model(data_name='census.csv'):
     logging.info("OK - train_model.py - inference completed")
 
     # validates the trained machine learning model using precision, recall, and f_beta
-    f_beta, precision, recall = mdl.compute_model_metrics(y_test, predictions)
+    f1, precision, recall = mdl.compute_model_metrics(y_test, predictions)
     logging.info("OK - train_model.py - validation completed:\n                             "
-                 "f_beta = {:.4f},   precision = {:.4f},   recall = {:.4f}".format(f_beta, precision, recall))
+                 "f1_score = {:.4f},   precision = {:.4f},   recall = {:.4f}".format(f1, precision, recall))
 
-    # save a model as trainedmodel.pkl
-    save_model(model, 'trainedmodel.pkl')
+    # save a model, encoder, and lb
+    mdl.save_model(model=model, encoder=encoder, lb=lb)
 
 if __name__ == '__main__':
     train_model(data_name='census.csv')

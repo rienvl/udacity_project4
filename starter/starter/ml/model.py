@@ -1,5 +1,13 @@
+import os
+import numpy as np
+import pickle
+import logging
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import fbeta_score, precision_score, recall_score
+from sklearn.metrics import f1_score, precision_score, recall_score
+
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
+logger = logging.getLogger()
 
 
 # Optional: implement hyperparameter tuning.
@@ -31,6 +39,61 @@ def train_model(X_train, y_train):
     return model
 
 
+def load_model():
+    '''
+    this function loads the model and encoder specified by inputs
+
+    Returns model, encoder, lb
+    -------
+    '''
+    full_folder_path = os.path.join(os.getcwd(), 'starter', 'model')
+    # load model
+    full_path = os.path.join(full_folder_path, 'trainedmodel.pkl')
+    with open(full_path, 'rb') as file:
+        model = pickle.load(file)
+    # load encoder
+    full_path = os.path.join(full_folder_path, 'trainedencoder.pkl')
+    with open(full_path, 'rb') as file:
+        encoder = pickle.load(file)
+    # load encoder
+    full_path = os.path.join(full_folder_path, 'trainedlb.pkl')
+    with open(full_path, 'rb') as file:
+        lb = pickle.load(file)
+    logging.info("OK - model.py: loaded model, encoder, and lb")
+
+    return model, encoder, lb
+
+
+def save_model(model, encoder, lb):
+    '''
+    this function saves the input model and encoder as pickle files
+    Parameters
+    ----------
+    model: input trained model
+    # model_name: name of the output pkl file
+    encoder: input trained encoder
+    # encoder_name: name of the output pkl file
+    lb: trained label binarizer
+    -------
+    '''
+    full_folder_path = os.path.join(os.getcwd(), 'starter', 'model')
+    # save model
+    full_path = os.path.join(full_folder_path, 'trainedmodel.pkl')
+    filehandler = open(full_path, 'wb')
+    pickle.dump(model, filehandler)
+    logging.info("OK - model.py: stored model           in {}".format(full_path))
+    # save encoder
+    full_path = os.path.join(full_folder_path, 'trainedencoder.pkl')
+    filehandler = open(full_path, 'wb')
+    pickle.dump(encoder, filehandler)
+    logging.info("OK - model.py: stored encoder         in {}".format(full_path))
+    # save lb
+    full_path = os.path.join(full_folder_path, 'trainedlb.pkl')
+    filehandler = open(full_path, 'wb')
+    pickle.dump(lb, filehandler)
+    logging.info("OK - model.py: stored label binarizer in {}".format(full_path))
+
+
 def compute_model_metrics(y, predict):
     """
     Validates the trained machine learning model using precision, recall, and f_beta.
@@ -43,14 +106,14 @@ def compute_model_metrics(y, predict):
         Predicted labels, binarized.
     Returns
     -------
+    f1_score : float
     precision : float
     recall : float
-    f_beta : float
     """
-    f_beta = fbeta_score(y, predict, beta=1, zero_division=1)
+    f1 = f1_score(y, predict)
     precision = precision_score(y, predict, zero_division=1)
     recall = recall_score(y, predict, zero_division=1)
-    return precision, recall, f_beta
+    return f1, precision, recall
 
 
 def inference(model, X):
@@ -69,3 +132,22 @@ def inference(model, X):
     """
     predict = model.predict(X)
     return predict
+
+
+def get_model_performance_on_slices(model, X_val, y_val, cat_features):
+
+    f1_score_list = []
+    # select any 3 features
+    selected_columns = {'MajorAxisLength', 'MinorAxisLength', 'ConvexArea'}
+    for column in selected_columns:
+        print('F1 score for {:15s} slices:  '.format(column), end="")
+        y_val_sub = y_val[X_val[column] < np.mean(X_val[column])]
+        X_val_sub = X_val[X_val[column] < np.mean(X_val[column])]
+        pred_sub = model.predict(X_val_sub)
+        f1_score_list.append(f1_score(y_val_sub, pred_sub))
+        y_val_sub = y_val[X_val[column] >= np.mean(X_val[column])]
+        X_val_sub = X_val[X_val[column] >= np.mean(X_val[column])]
+        pred_sub = model.predict(X_val_sub)
+        f1_score_list.append(f1_score(y_val_sub, pred_sub))
+        print('{:.3f}  and  {:.3f}\n'.format(f1_score_list[-1], f1_score_list[-2]))
+    return
