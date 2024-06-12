@@ -1,3 +1,5 @@
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve(strict=True).parent
 import os
 import numpy as np
 import pickle
@@ -36,40 +38,40 @@ def train_model(X_train, y_train):
 
     # fit the logistic regression to your data
     model = logit.fit(X_train, y_train)
+
     return model
 
 
-def load_model(parent_path='~/git/udacity_project_4/'):
+def load_model():
     '''
     this function loads the model and encoder specified by inputs
 
     Returns model, encoder, lb
     -------
     '''
-    full_folder_path = os.path.join(parent_path, 'starter', 'model')
-    full_path = os.path.join(full_folder_path, 'trainedmodel.pkl')
     # load model
-    if not os.path.isfile(full_path):
-        print('WARNING Is not file: {}'.format(full_path))
-
+    full_path = Path(BASE_DIR).joinpath(f"../../model/trainedmodel.pkl")
     with open(full_path, 'rb') as file:
         model = pickle.load(file)
+
     # load encoder
-    full_path = os.path.join(full_folder_path, 'trainedencoder.pkl')
+    full_path = Path(BASE_DIR).joinpath(f"../../model/trainedencoder.pkl")
     print(os.path.isfile(full_path))
     with open(full_path, 'rb') as file:
         encoder = pickle.load(file)
-    # load encoder
-    full_path = os.path.join(full_folder_path, 'trainedlb.pkl')
+
+    # load label binarizer
+    full_path = Path(BASE_DIR).joinpath(f"../../model/trainedlb.pkl")
     print(os.path.isfile(full_path))
     with open(full_path, 'rb') as file:
         lb = pickle.load(file)
+
     logging.info("OK - model.py: loaded model, encoder, and lb")
 
     return model, encoder, lb
 
 
-def save_model(model, encoder, lb, parent_path='~/git/udacity_project_4/'):
+def save_model(model, encoder, lb):
     '''
     this function saves the input model and encoder as pickle files
     Parameters
@@ -81,19 +83,18 @@ def save_model(model, encoder, lb, parent_path='~/git/udacity_project_4/'):
     lb: trained label binarizer
     -------
     '''
-    full_folder_path = os.path.join(parent_path, 'starter', 'model')
     # save model
-    full_path = os.path.join(full_folder_path, 'trainedmodel.pkl')
+    full_path = Path(BASE_DIR).joinpath(f"../../model/trainedmodel.pkl")
     filehandler = open(full_path, 'wb')
     pickle.dump(model, filehandler)
     logging.info("OK - model.py: stored model           in {}".format(full_path))
     # save encoder
-    full_path = os.path.join(full_folder_path, 'trainedencoder.pkl')
+    full_path = Path(BASE_DIR).joinpath(f"../../model/trainedencoder.pkl")
     filehandler = open(full_path, 'wb')
     pickle.dump(encoder, filehandler)
     logging.info("OK - model.py: stored encoder         in {}".format(full_path))
     # save lb
-    full_path = os.path.join(full_folder_path, 'trainedlb.pkl')
+    full_path = Path(BASE_DIR).joinpath(f"../../model/trainedlb.pkl")
     filehandler = open(full_path, 'wb')
     pickle.dump(lb, filehandler)
     logging.info("OK - model.py: stored label binarizer in {}".format(full_path))
@@ -118,6 +119,7 @@ def compute_model_metrics(y, predict):
     f1 = f1_score(y, predict, zero_division=np.NaN)
     precision = precision_score(y, predict, zero_division=1)
     recall = recall_score(y, predict, zero_division=1)
+
     return f1, precision, recall
 
 
@@ -183,8 +185,8 @@ if __name__ == '__main__':
     # load trained model
     model, encoder, lb = load_model()
     # load test data
-    full_input_path = os.path.join('starter', 'data', 'census.csv')
-    data = pd.read_csv(full_input_path)
+    full_path = Path(BASE_DIR).joinpath(f"../../data/census.csv")
+    data = pd.read_csv(full_path)
     # clean test data
     data = clean_data(data)
     # split data

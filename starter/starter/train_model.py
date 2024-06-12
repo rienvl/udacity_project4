@@ -1,4 +1,5 @@
-import os
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve(strict=True).parent
 import numpy as np
 import logging
 import pandas as pd
@@ -11,7 +12,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
 logger = logging.getLogger()
 
 
-def load_data(parent_path='~/git/udacity_project_4/'):
+def load_data():
     '''
     this function loads the data file specified by data_name and returns the data as a DataFrame
     Parameters
@@ -20,10 +21,8 @@ def load_data(parent_path='~/git/udacity_project_4/'):
     Returns data: pandas DataFrame
     -------
     '''
-    full_path = os.path.join(parent_path, 'starter', 'data', 'census.csv')
-    if not os.path.isfile(full_path):
-        print('WARNING Is not file: {}'.format(full_path))
     # read in data using the pandas module
+    full_path = Path(BASE_DIR).joinpath(f"../data/census.csv")
     data = pd.read_csv(full_path)
     logging.info("OK - train_model.py: loaded training data containing {} rows".format(data.shape[0]))
     return data
@@ -50,7 +49,7 @@ def clean_data(data_df):
     return data_df
 
 
-def train_model(data_name='census.csv'):
+def train_model():
     '''
     this function
     1) loads the raw data specified by input data_name
@@ -66,7 +65,7 @@ def train_model(data_name='census.csv'):
     -------
     '''
     # load the data file specified by data_name and returns the data as a DataFrame
-    data = load_data(parent_path='~/git/udacity_project_4/')
+    data = load_data()
 
     # remove rows with missing data
     data = clean_data(data)
@@ -99,9 +98,6 @@ def train_model(data_name='census.csv'):
     )
     logging.info("OK - train_model.py: processed test  data, {} rows".format(y_test.shape[0]))
 
-    # X_train = train_data.loc[:, ['last_month', 'last_year', 'number_of']].values.reshape(-1, 3)
-    # y_train = train_data['exited'].values.reshape(-1, 1).ravel()  # target
-
     # train model
     model = mdl.train_model(X_train, y_train)
     logging.info("OK - train_model.py: model training completed")
@@ -118,5 +114,6 @@ def train_model(data_name='census.csv'):
     # save a model, encoder, and lb
     mdl.save_model(model=model, encoder=encoder, lb=lb)
 
+
 if __name__ == '__main__':
-    train_model(data_name='census.csv')
+    train_model()

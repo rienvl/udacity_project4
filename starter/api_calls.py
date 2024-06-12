@@ -12,7 +12,7 @@ URL = 'http://0.0.0.0'
 response1 = requests.post(URL + ':8000/inference').content  # returns list predictions
 
 print(response1)
-#response1 = eval(response1.decode('ascii'))
+response1 = eval(response1.decode('ascii'))
 
 # pop status from all responses
 response1.pop('status')
@@ -27,4 +27,4 @@ print('response_1: {}'.format(response1))
 # full_output_path = os.path.join(output_path, 'apireturns.txt')
 # with open(full_output_path, 'w') as file:
 #     file.write(json.dumps(responses))
-# print('OK - apicalls completed')
+# print('OK - api_calls completed')

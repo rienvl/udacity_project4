@@ -1,3 +1,5 @@
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve(strict=True).parent
 import numpy as np
 from sklearn.preprocessing import LabelBinarizer, OneHotEncoder
 

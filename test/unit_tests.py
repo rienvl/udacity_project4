@@ -1,3 +1,5 @@
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve(strict=True).parent
 import os
 import pytest
 import pandas as pd
@@ -25,7 +27,7 @@ cat_features = [
 
 @pytest.fixture(scope="module")
 def test_data():
-    full_input_path = os.path.join('starter', 'data', 'census.csv')
+    full_input_path = os.path.join(BASE_DIR, 'starter', 'data', 'census.csv')
     data = None
     try:
         data = pd.read_csv(full_input_path)
