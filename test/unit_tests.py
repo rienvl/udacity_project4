@@ -27,7 +27,7 @@ cat_features = [
 
 @pytest.fixture(scope="module")
 def test_data():
-    full_input_path = os.path.join(BASE_DIR, 'starter', 'data', 'census.csv')
+    full_input_path = Path(BASE_DIR).joinpath(f"../starter/data/census.csv")
     data = None
     try:
         data = pd.read_csv(full_input_path)

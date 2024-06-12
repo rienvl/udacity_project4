@@ -10,7 +10,8 @@ FAIL_COLOR = '\033[91m'
 OK_COLOR = '\033[92m'
 WARN_COLOR = '\033[93m'
 
-def run_sanity_check(test_dir):
+
+def run_sanity_check(test_dir=f"starter/test/test_local.py"):
 
     #assert path.isdir(test_dir), FAIL_COLOR+f"No direcotry named {test_dir} found in {os.getcwd()}"
     print('This script will perform a sanity test to ensure your code meets the criteria in the rubric.\n')

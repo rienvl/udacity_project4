@@ -2,16 +2,17 @@
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve(strict=True).parent
 import os
-from typing import Union, List
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
 import logging
 import numpy as np
 from sklearn.model_selection import train_test_split
+# from starter.starter.ml.data import process_data
+# from starter.starter.ml.model import load_model, inference
+# from starter.starter.train_model import load_data, clean_data
 from starter.ml.data import process_data
 from starter.ml.model import load_model, inference
 from starter.train_model import load_data, clean_data
-import codecs, json
+import json
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
@@ -70,7 +71,7 @@ app = FastAPI()  # instantiate the app
 
 @app.get("/")      # “/” : defines the default endpoint location http://127.0.0.1:8000
 async def get_root():
-    return {"greeting": "welcome to project_4"}  # return a JSON response on the browser (URL: see below)
+    return {"greeting": "welcome to project_4", 'status': 200}  # return a JSON response on the browser (URL: see below)
 
 
 # a POST that does model inference
@@ -87,7 +88,3 @@ async def post_model_inference():
 # @app.get("/items/{item_id}")
 # async def get_items(item_id: int, count: int = 1):
 #     return {"fetch": f"Fetched {count} of {item_id}"}
-
-
-if __name__ == '__main__':
-    os.system('uvicorn main:app --reload')
