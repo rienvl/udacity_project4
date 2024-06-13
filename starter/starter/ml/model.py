@@ -148,22 +148,31 @@ def get_model_performance_on_slices(X_val, y_val, cat_features, model, encoder):
     n_continuous = X_val.shape[1] - len(slice_cat)
     print('n_continuous = {},   n_categorical = {}'.format(n_continuous, len(slice_cat)))
     f1_score_list = []
-    for idx, column in enumerate(slice_cat):
-        column_idx = n_continuous + idx
-        f1 = np.NaN  # initialize as nan
-        if np.count_nonzero(X_val[:, column_idx]) > 10:
-            # only compute f1 score if sufficient samples
-            y_val_sub = y_val[X_val[:, column_idx] > 0]
-            X_val_sub = X_val[X_val[:, column_idx] > 0]
-            pred_sub = model.predict(X_val_sub)
-            f1 = f1_score(y_val_sub, pred_sub, zero_division=np.NaN)
-            print('F1 score {:.3f} for slices {}'.format(f1, column))
-        else:
-            print('no reliable score: {}'.format(column))
+    precision_list = []
+    recall_list = []
+    full_path = Path(BASE_DIR).joinpath(f"../../../project_output_files/slice_output.txt")
+    with open(full_path, 'a') as file:
+        for idx, column in enumerate(slice_cat):
+            column_idx = n_continuous + idx
+            f1 = np.NaN  # initialize as nan
+            if np.count_nonzero(X_val[:, column_idx]) > 10:
+                # only compute f1 score if sufficient samples
+                y_val_sub = y_val[X_val[:, column_idx] > 0]
+                X_val_sub = X_val[X_val[:, column_idx] > 0]
+                pred_sub = model.predict(X_val_sub)
+                f1, precision, recall = compute_model_metrics(y_val_sub, pred_sub)
+                # add result to file
+                file.write('[F1,precision,recall] = [{:.3f},{:.3f},{:.3f}] for slices {}\n'.format(f1, precision, recall, column))
+                print('[F1,precision,recall] = [{:.3f},{:.3f},{:.3f}] for slices {}'
+                      .format(f1, precision, recall, column))
+            else:
+                print('no reliable score: {}'.format(column))
 
-        f1_score_list.append(f1)
+            f1_score_list.append(f1)
+            precision_list.append(precision)
+            recall_list.append(recall)
 
-    return f1_score_list, slice_cat
+    return f1_score_list, precision_list, recall_list, slice_cat
 
 
 if __name__ == '__main__':

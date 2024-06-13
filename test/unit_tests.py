@@ -102,7 +102,7 @@ def test_inference(model_encoder_lb, clean_test_data):
 
     predict, predict_proba = mdl.inference(model, X_test)
     assert isinstance(predict[0], np.int64), 'inference() returned wrong type for predict'
-    assert isinstance(predict_proba[0], np.int64), 'inference() returned wrong type for predict_proba'
+    assert isinstance(predict_proba[0, 0], float), 'inference() returned wrong type for predict_proba'
     assert (predict.shape[0] == X_test.shape[0]), 'inference() returned wrong shape for predict'
     assert (predict_proba.shape[0] == X_test.shape[0]), 'inference() returned wrong shape for predict_proba'
 
@@ -116,11 +116,13 @@ def test_compute_model_metrics(model_encoder_lb, clean_test_data):
     )
     logging.info("OK - test_compute_model_metrics.py: processed data")
 
-    predict = mdl.inference(model, X_test)
+    # model inference
+    predict, _ = mdl.inference(model, X_test)
+    logging.info("OK - test_compute_model_metrics.py: inference completed")
 
-    f1_score = -1
-    precision = -1
-    recall = -1
+    f1_score = None
+    precision = None
+    recall = None
     try:
         f1_score, precision, recall = mdl.compute_model_metrics(y_test, predict)
     except:
@@ -144,15 +146,20 @@ def test_performance_on_slices(model_encoder_lb, clean_test_data):
     )
     logging.info("OK - test_performance_on_slices.py: processed data")
 
-    f1_score_list = -1
-    slice_cat = -1
+    f1_score_list = None
+    precision_list = None
+    recall_list = None
+    slice_cat = None
     try:
-        f1_score_list, slice_cat = mdl.get_model_performance_on_slices(X_test, y_test, cat_features, model, encoder)
+        f1_score_list, precision_list, recall_list, slice_cat = mdl.get_model_performance_on_slices(
+            X_test, y_test, cat_features, model, encoder)
     except:
         logging.info("ERROR - unit_tests.py: mdl.get_model_performance_on_slices() returned error")
         pytest.fail("test_performance_on_slices()")
 
     assert isinstance(f1_score_list, list), 'get_model_performance_on_slices() returned wrong type for f1_score_list'
+    assert isinstance(precision_list, list), 'get_model_performance_on_slices() returned wrong type for precision_list'
+    assert isinstance(recall_list, list), 'get_model_performance_on_slices() returned wrong type for recall_list'
     assert isinstance(slice_cat, object), 'get_model_performance_on_slices() returned wrong type for slice_cat'
 
 # def test_slice_averages(clean_test_data):
