@@ -1,35 +1,25 @@
 ''' main.py - contains the definition of the API '''
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve(strict=True).parent
-import os
+# import os
+# import numpy as np
+# import json
+# import pickle
+import pandas as pd
 from fastapi import FastAPI
+from pydantic import BaseModel, Field, Json
+from typing import Dict  # , Any, List
 import logging
-import numpy as np
-from sklearn.model_selection import train_test_split
-# from starter.starter.ml.data import process_data
-# from starter.starter.ml.model import load_model, inference
-# from starter.starter.train_model import load_data, clean_data
 from starter.ml.data import process_data
 from starter.ml.model import load_model, inference
-from starter.train_model import load_data, clean_data
-import json
+from starter.train_model import clean_data
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
 logger = logging.getLogger()
 
 
-def load_model_and_data():
-    logging.info("OK - current path = {}".format(os.getcwd()))
-    # load the data file specified by data_name and returns the data as a DataFrame
-    data = load_data()
-    # remove rows with missing data
-    data = clean_data(data)
-    # split data
-    train_data, test_data = train_test_split(data, test_size=0.20)
-    logging.info("OK - train_model.py: train-test split completed")
-
-    cat_features = [
+cat_features = [
         "workclass",
         "education",
         "marital-status",
@@ -40,51 +30,98 @@ def load_model_and_data():
         "native-country",
     ]
 
+
+class InputX(BaseModel):
+    json_obj: Dict
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [{
+                    "json_obj": {
+                        "age": 39,
+                        "workclass": "State-gov",
+                        "fnlgt": 77516,
+                        "education": "Bachelors",
+                        "education-num": 13,
+                        "marital-status": "Never-married",
+                        "occupation": "Adm-clerical",
+                        "relationship": "Not-in-family",
+                        "race": "White",
+                        "sex": "Male",
+                        "capital-gain": 2174,
+                        "capital-loss": 0,
+                        "hours-per-week": 40,
+                        "native-country": "United- States"
+                    }}]}}
+
+
+def convert_json(x_dict):
+    # print("convert_json() started")
+    # print(isinstance(x_dict, dict))  # X.json_obj is a dict
+    # print(X.json_obj.keys())
+    # convert dict to dataframe
+    data = pd.DataFrame(x_dict, index=[0])
+
+    # remove rows with missing data
+    data = clean_data(data)
+    # logging.info("OK - convert_json(): cleaned test data")
+
     # load model
-    logging.info("OK - current path = {}".format(os.getcwd()))
     model, encoder, lb = load_model()
+    # logging.info("OK - convert_json(): loaded model items")
 
     # proces the test data with the process_data function
-    X_test, y_test, _, _ = process_data(
-        test_data, categorical_features=cat_features, label="salary", training=False, encoder=encoder, lb=lb
+    X_test, _, _, _ = process_data(
+        data, categorical_features=cat_features, label="salary", training=False, encoder=encoder, lb=lb
     )
-    logging.info("OK - train_model.py: processed test  data, {} rows".format(y_test.shape[0]))
+    # logging.info("OK - convert_json(): processed data, {} rows".format(X_test.shape[0]))
+    # print("convert_json() finished")
 
     return model, X_test
-
-
-# class NumpyArray(BaseModel):
-#     numpyArray: np.ndarray #= Field(default_factory=lambda: np.zeros(10))
-#     class Config:
-#         arbitrary_types_allowed = True
-
-
-class NumpyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
 
 
 app = FastAPI()  # instantiate the app
 
 
-@app.get("/")      # “/” : defines the default endpoint location http://127.0.0.1:8000
+@app.get("/")
 async def get_root():
-    return {"greeting": "welcome to project_4", 'status': 200}  # return a JSON response on the browser (URL: see below)
+    return {"greetings": "welcome to project_4", 'status_code': 200}
 
 
 # a POST that does model inference
 @app.post("/inference")    # defines as endpoint: http://localhost:8000/inference
-async def post_model_inference():
-    model, X_test = load_model_and_data()
-    print(X_test.shape)
-    predicts = inference(model, X_test)
-    prediction_list = json.dumps({'predicts': predicts}, cls=NumpyEncoder)
+async def post_model_inference(data: InputX):
+    model, x_data = convert_json(data.json_obj)
+    predict, predict_proba = inference(model, x_data)
+    print("predict = {},  predict_proba[0] = {},  predict_proba[1] = {}"
+          .format(predict[0], predict_proba[0, 0], predict_proba[0, 1]))
 
-    return {'predictions_list': prediction_list, 'status': 200}  # add return value for prediction outputs
+    return {'predict': int(predict[0]), 'predict_proba_0': float(predict_proba[0, 0])}
 
 
-# @app.get("/items/{item_id}")
-# async def get_items(item_id: int, count: int = 1):
-#     return {"fetch": f"Fetched {count} of {item_id}"}
+# class NumpyArray(BaseModel):
+#     X: np.ndarray = Field(default_factory=lambda: np.zeros(10))
+#
+#     class Config:
+#         arbitrary_types_allowed = True
+#
+#     # model_config = {
+#     #     "json_schema_extra": {
+#     #         "examples": [{
+#     #             "X": np.zeros(200)
+#     #         }]}}
+#
+#
+# class NumpyEncoder(json.JSONEncoder):
+#     def default(self, obj):
+#         if isinstance(obj, np.ndarray):
+#             return obj.tolist()
+#         return json.JSONEncoder.default(self, obj)
+#
+#
+# class AnyJsonModel(BaseModel):
+#     json_obj: Json[Any]
+#
+#
+# class ConstrainedJsonModel(BaseModel):
+#     json_obj: Json[List[float]]

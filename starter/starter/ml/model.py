@@ -42,7 +42,7 @@ def train_model(X_train, y_train):
     return model
 
 
-def load_model():
+def load_model(prefix='trained'):
     '''
     this function loads the model and encoder specified by inputs
 
@@ -50,19 +50,17 @@ def load_model():
     -------
     '''
     # load model
-    full_path = Path(BASE_DIR).joinpath(f"../../model/trainedmodel.pkl")
+    full_path = Path(BASE_DIR).joinpath("../../model/{}model.pkl".format(prefix))
     with open(full_path, 'rb') as file:
         model = pickle.load(file)
 
     # load encoder
-    full_path = Path(BASE_DIR).joinpath(f"../../model/trainedencoder.pkl")
-    print(os.path.isfile(full_path))
+    full_path = Path(BASE_DIR).joinpath("../../model/{}encoder.pkl".format(prefix))
     with open(full_path, 'rb') as file:
         encoder = pickle.load(file)
 
     # load label binarizer
-    full_path = Path(BASE_DIR).joinpath(f"../../model/trainedlb.pkl")
-    print(os.path.isfile(full_path))
+    full_path = Path(BASE_DIR).joinpath("../../model/{}lb.pkl".format(prefix))
     with open(full_path, 'rb') as file:
         lb = pickle.load(file)
 
@@ -135,10 +133,13 @@ def inference(model, X):
     Returns
     -------
     predict : np.array
-        Predictions from the model.
+        Predictions from the model
+    predict_proba : np.array
+        Predictions probability from the model.
     """
     predict = model.predict(X)
-    return predict
+    predict_proba = model.predict_proba(X)
+    return predict, predict_proba
 
 
 def get_model_performance_on_slices(X_val, y_val, cat_features, model, encoder):
@@ -183,17 +184,21 @@ if __name__ == '__main__':
     ]
 
     # load trained model
-    model, encoder, lb = load_model()
+    model, encoder, lb = load_model(prefix='static_test_')
     # load test data
     full_path = Path(BASE_DIR).joinpath(f"../../data/census.csv")
     data = pd.read_csv(full_path)
     # clean test data
     data = clean_data(data)
     # split data
-    train_data, test_data = train_test_split(data, test_size=0.20)
+    train_data, test_data = train_test_split(data, test_size=0.20, random_state=44)
     # proces the test data
     X_test, y_test, _, _ = process_data(
         test_data, categorical_features=cat_features, label="salary", training=False, encoder=encoder, lb=lb
     )
+
+    # test inference
+    predicts = inference(model, X_test)
+
     # get model performance on slices
     get_model_performance_on_slices(X_test, y_test, cat_features, model, encoder)

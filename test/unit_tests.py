@@ -100,9 +100,11 @@ def test_inference(model_encoder_lb, clean_test_data):
     )
     logging.info("OK - test_inference.py: processed data")
 
-    predict = mdl.inference(model, X_test)
-    assert isinstance(predict[0], np.int64), 'inference() returned wrong type'
-    assert (predict.shape[0] == X_test.shape[0]), 'inference() returned output with wrong shape'
+    predict, predict_proba = mdl.inference(model, X_test)
+    assert isinstance(predict[0], np.int64), 'inference() returned wrong type for predict'
+    assert isinstance(predict_proba[0], np.int64), 'inference() returned wrong type for predict_proba'
+    assert (predict.shape[0] == X_test.shape[0]), 'inference() returned wrong shape for predict'
+    assert (predict_proba.shape[0] == X_test.shape[0]), 'inference() returned wrong shape for predict_proba'
 
 
 def test_compute_model_metrics(model_encoder_lb, clean_test_data):
