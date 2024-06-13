@@ -1,6 +1,4 @@
 from pathlib import Path
-BASE_DIR = Path(__file__).resolve(strict=True).parent
-import os
 import pytest
 import pandas as pd
 import numpy as np
@@ -8,21 +6,21 @@ import logging
 from ..starter.starter.ml import model as mdl
 from ..starter.starter.ml.data import process_data
 from ..starter.starter.train_model import clean_data
-
+BASE_DIR = Path(__file__).resolve(strict=True).parent
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
 logger = logging.getLogger()
 
 cat_features = [
-        "workclass",
-        "education",
-        "marital-status",
-        "occupation",
-        "relationship",
-        "race",
-        "sex",
-        "native-country",
-    ]
+    "workclass",
+    "education",
+    "marital-status",
+    "occupation",
+    "relationship",
+    "race",
+    "sex",
+    "native-country",
+]
 
 
 @pytest.fixture(scope="module")
@@ -56,7 +54,7 @@ def clean_test_data(test_data):
 @pytest.fixture(scope="module")
 def model_encoder_lb():
     try:
-        model,  encoder, lb = mdl.load_model()
+        model, encoder, lb = mdl.load_model()
         logging.info("OK - pytest.py: loaded model, encoder, and lb")
     except:
         logging.info("ERROR - unit_tests.py: model loading returned error")

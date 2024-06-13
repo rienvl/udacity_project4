@@ -1,12 +1,11 @@
 from pathlib import Path
-BASE_DIR = Path(__file__).resolve(strict=True).parent
-import os
 import numpy as np
 import pickle
 import logging
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, precision_score, recall_score
 
+BASE_DIR = Path(__file__).resolve(strict=True).parent
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
 logger = logging.getLogger()
@@ -162,7 +161,9 @@ def get_model_performance_on_slices(X_val, y_val, cat_features, model, encoder):
                 pred_sub = model.predict(X_val_sub)
                 f1, precision, recall = compute_model_metrics(y_val_sub, pred_sub)
                 # add result to file
-                file.write('[F1,precision,recall] = [{:.3f},{:.3f},{:.3f}] for slices {}\n'.format(f1, precision, recall, column))
+                file.write(
+                    '[F1,precision,recall] = [{:.3f},{:.3f},{:.3f}] for slices {}\n'.format(f1, precision, recall,
+                                                                                            column))
                 print('[F1,precision,recall] = [{:.3f},{:.3f},{:.3f}] for slices {}'
                       .format(f1, precision, recall, column))
             else:

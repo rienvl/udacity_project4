@@ -1,18 +1,18 @@
 from pathlib import Path
-BASE_DIR = Path(__file__).resolve(strict=True).parent
 # import os
 # import numpy as np
 # import pandas as pd
 # import logging
 import json
-from fastapi.testclient import TestClient   # import the TestClient class
+from fastapi.testclient import TestClient  # import the TestClient class
 from pydantic import ValidationError
 from main import app, InputX  # , NumpyArray, NumpyEncoder, AnyJsonModel, ConstrainedJsonModel
 from starter.train_model import load_data
-
+BASE_DIR = Path(__file__).resolve(strict=True).parent
 
 # Instantiate the testing client with our app
 client = TestClient(app)
+
 
 # Write the unit tests using the same syntax as with the requests module.
 
@@ -26,17 +26,17 @@ def load_test_data():
 
 
 def test_api_locally_get_root_status():
-    r = client.get("/")   # a request against the root domain
-    assert r.status_code == 200   # requests return 200 if successful
+    r = client.get("/")  # a request against the root domain
+    assert r.status_code == 200  # requests return 200 if successful
 
 
 def test_api_locally_get_root_response_type():
-    r = client.get("/")   # a request against the root domain
+    r = client.get("/")  # a request against the root domain
     assert isinstance(r.json()["greetings"], str)
 
 
 def test_api_locally_get_root_response_msg():
-    r = client.get("/")   # a request against the root domain
+    r = client.get("/")  # a request against the root domain
     assert r.json()["greetings"] == "welcome to project_4"
 
 
@@ -64,7 +64,7 @@ def test_api_locally_inference_status():
     # api call
     r = client.post("/inference", data=data)
 
-    assert r.status_code == 200   # requests return 200 if successful
+    assert r.status_code == 200  # requests return 200 if successful
 
 
 def test_api_locally_inference_check_predict_type():
@@ -94,7 +94,6 @@ def test_api_locally_inference_check_proba_type():
 
 
 if __name__ == '__main__':
-
     test_api_locally_get_root_status()
     print('OK - test_api_locally_get_root_status()\n')
 

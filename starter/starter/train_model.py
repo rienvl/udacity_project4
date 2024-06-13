@@ -1,12 +1,11 @@
 from pathlib import Path
-BASE_DIR = Path(__file__).resolve(strict=True).parent
 import numpy as np
 import logging
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from .ml.data import process_data
 from .ml import model as mdl
-
+BASE_DIR = Path(__file__).resolve(strict=True).parent
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
 logger = logging.getLogger()

@@ -1,10 +1,10 @@
 from pathlib import Path
-BASE_DIR = Path(__file__).resolve(strict=True).parent
 import os
 import pandas as pd
 import logging
 from .starter.train_model import clean_data
 
+BASE_DIR = Path(__file__).resolve(strict=True).parent
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
 logger = logging.getLogger()
@@ -15,7 +15,7 @@ def data_slicing(df):
 
     for class_label in class_labels:
         logging.info("descriptive stats for {}:\n{}\n".format(
-        class_label, df.loc[df['salary'] == class_label].describe()))
+            class_label, df.loc[df['salary'] == class_label].describe()))
 
     logging.info("OK - data_slicing.py finished")
     return

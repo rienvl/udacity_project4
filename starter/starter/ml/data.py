@@ -1,11 +1,12 @@
 from pathlib import Path
-BASE_DIR = Path(__file__).resolve(strict=True).parent
 import numpy as np
 from sklearn.preprocessing import LabelBinarizer, OneHotEncoder
 
+BASE_DIR = Path(__file__).resolve(strict=True).parent
+
 
 def process_data(
-    X, categorical_features=None, label=None, training=True, encoder=None, lb=None
+        X, categorical_features=None, label=None, training=True, encoder=None, lb=None
 ):
     """ Process the data used in the machine learning pipeline.
 
