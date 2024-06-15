@@ -71,7 +71,7 @@ def convert_json(x_dict):
 
     # proces the test data with the process_data function
     X_test, _, _, _ = process_data(
-        data, categorical_features=cat_features, label="salary",
+        data, categorical_features=cat_features, label=None,
         training=False, encoder=encoder, lb=lb
     )
     # logging.info("OK - convert_json(): processed data")
