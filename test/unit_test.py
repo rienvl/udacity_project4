@@ -30,11 +30,11 @@ def test_data():
     try:
         data = pd.read_csv(full_input_path)
     except FileNotFoundError:
-        logging.info("ERROR - unit_tests.py: file not found")
+        logging.info("ERROR - unit_test.py: file not found")
         pytest.fail("fixture test_data()")
 
     if data is None:
-        logging.info("ERROR - unit_tests.py: csv read of test data returned NaN")
+        logging.info("ERROR - unit_test.py: csv read of test data returned NaN")
         pytest.fail("fixture test_data()")
 
     return data
@@ -45,7 +45,7 @@ def clean_test_data(test_data):
     try:
         test_data = clean_data(test_data)
     except:
-        logging.info("ERROR - unit_tests.py: clean_data() step returned error")
+        logging.info("ERROR - unit_test.py: clean_data() step returned error")
         pytest.fail("fixture clean_test_data()")
 
     return test_data
@@ -57,7 +57,7 @@ def model_encoder_lb():
         model, encoder, lb = mdl.load_model()
         logging.info("OK - pytest.py: loaded model, encoder, and lb")
     except:
-        logging.info("ERROR - unit_tests.py: model loading returned error")
+        logging.info("ERROR - unit_test.py: model loading returned error")
         pytest.fail("fixture model_encoder()")
 
     return model, encoder, lb
@@ -124,7 +124,7 @@ def test_compute_model_metrics(model_encoder_lb, clean_test_data):
     try:
         f1_score, precision, recall = mdl.compute_model_metrics(y_test, predict)
     except:
-        logging.info("ERROR - unit_tests.py: mdl.compute_model_metrics() returned error")
+        logging.info("ERROR - unit_test.py: mdl.compute_model_metrics() returned error")
         pytest.fail("test_compute_model_metrics()")
 
     assert isinstance(f1_score, float), 'compute_model_metrics() returned wrong type for f1_score'
@@ -152,7 +152,7 @@ def test_performance_on_slices(model_encoder_lb, clean_test_data):
         f1_score_list, precision_list, recall_list, slice_cat = mdl.get_model_performance_on_slices(
             X_test, y_test, cat_features, model, encoder)
     except:
-        logging.info("ERROR - unit_tests.py: mdl.get_model_performance_on_slices() returned error")
+        logging.info("ERROR - unit_test.py: mdl.get_model_performance_on_slices() returned error")
         pytest.fail("test_performance_on_slices()")
 
     assert isinstance(f1_score_list, list), 'get_model_performance_on_slices() returned wrong type for f1_score_list'
