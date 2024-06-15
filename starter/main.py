@@ -9,9 +9,9 @@ from fastapi import FastAPI
 from pydantic import BaseModel  # , Field, Json
 from typing import Dict  # , Any, List
 import logging
-from starter.ml.data import process_data
-from starter.ml.model import load_model, inference
-from starter.train_model import clean_data
+from .starter.ml.data import process_data
+from .starter.ml.model import load_model, inference
+from .starter.train_model import clean_data
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent
 

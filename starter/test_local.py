@@ -6,8 +6,8 @@ from pathlib import Path
 import json
 from fastapi.testclient import TestClient  # import the TestClient class
 from pydantic import ValidationError
-from main import app, InputX  # , NumpyArray, NumpyEncoder, AnyJsonModel, ConstrainedJsonModel
-from starter.train_model import load_data
+from .main import app, InputX  # , NumpyArray, NumpyEncoder, AnyJsonModel, ConstrainedJsonModel
+from .starter.train_model import load_data
 BASE_DIR = Path(__file__).resolve(strict=True).parent
 
 # Instantiate the testing client with our app
@@ -19,10 +19,13 @@ client = TestClient(app)
 
 def load_test_data():
     # load the data file specified by data_name and returns the data as a DataFrame
-    data = load_data()
+    data_df = load_data()
+    data_df = data_df.drop('salary', axis=1)
+    print(data_df.columns)
+
     # logging.info("OK - load_test_data(): loaded test dataset")
 
-    return data
+    return data_df
 
 
 def test_api_locally_get_root_status():
