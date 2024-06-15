@@ -102,11 +102,11 @@ def train_model():
     logging.info("OK - train_model.py: model training completed")
 
     # model inferences
-    predictions = mdl.inference(model, X_test)
+    predict, _ = mdl.inference(model, X_test)
     logging.info("OK - train_model.py - inference completed")
 
     # validates the trained machine learning model using precision, recall, and f_beta
-    f1, precision, recall = mdl.compute_model_metrics(y_test, predictions)
+    f1, precision, recall = mdl.compute_model_metrics(y_test, predict)
     logging.info("OK - train_model.py - validation completed:\n                             "
                  "f1_score = {:.4f},   precision = {:.4f},   recall = {:.4f}".format(f1, precision, recall))
 
