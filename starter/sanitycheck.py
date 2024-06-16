@@ -1,12 +1,14 @@
+from pathlib import Path
 from os import path
 import argparse
-import importlib
 import inspect
 import sys
+BASE_DIR = Path(__file__).resolve(strict=True).parent
 
 FAIL_COLOR = '\033[91m'
 OK_COLOR = '\033[92m'
 WARN_COLOR = '\033[93m'
+from .test import test_local_api as module
 
 
 def run_sanity_check(test_dir=f"starter/test/test_local.py"):
@@ -15,13 +17,28 @@ def run_sanity_check(test_dir=f"starter/test/test_local.py"):
     print('This script will perform a sanity test to ensure your code meets the criteria in the rubric.\n')
     print('Please enter the path to the file that contains your test cases for the GET() and POST() methods')
     print('The path should be something like abc/def/test_xyz.py')
-    filepath = input('> ')
+    # filepath = input('> ')
+    # assert path.exists(filepath), f"File {filepath} does not exist."
+    # sys.path.append(path.dirname(filepath))
 
+    filepath = Path(BASE_DIR).joinpath("test/test_local_api.py")
     assert path.exists(filepath), f"File {filepath} does not exist."
-    sys.path.append(path.dirname(filepath))
+    sys.path.append(filepath)
+    sys.path.append(Path(BASE_DIR).joinpath("../"))
 
-    module_name = path.splitext(path.basename(filepath))[0]
-    module = importlib.import_module(module_name)
+    #module_name = path.splitext(path.basename(filepath))[0]
+    module_name = 'test_local_api.py'
+    print("module_name = {}\n\n".format(module_name))
+    #module = importlib.import_module(module_name, package='udacity_project_4.test')
+
+    #module = importlib.import_module('test_local_api', package=Path(BASE_DIR).joinpath("../test"))
+    #module = importlib.import_module('test_local_api', package=Path(BASE_DIR).joinpath("../test"))
+
+    #module = importlib.util.module_from_spec(spec)
+
+    #from .test import test_local_api as module
+
+    #module = getattr(configuration_models, f"{class_name.lower()}s")
 
 
     test_function_names = list(filter(lambda x: inspect.isfunction(getattr(module,x)) and not x.startswith('__'), dir(module)))
@@ -125,7 +142,8 @@ def run_sanity_check(test_dir=f"starter/test/test_local.py"):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('test_dir', metavar='test_dir', nargs='?', default='tests',
+    parser.add_argument('test_dir', metavar='test_dir', nargs='?', default='test',
                         help='Name of the directory that has test files.')
     args = parser.parse_args()
+    print('\n\n  using test dir: {}\n\n'.format(args.test_dir))
     run_sanity_check(args.test_dir)

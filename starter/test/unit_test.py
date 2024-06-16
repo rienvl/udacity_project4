@@ -3,9 +3,9 @@ import pytest
 import pandas as pd
 import numpy as np
 import logging
-from ..starter.starter.ml import model as mdl
-from ..starter.starter.ml.data import process_data
-from ..starter.starter.train_model import clean_data
+from ..starter.ml import model as mdl
+from ..starter.ml.data import process_data
+from ..starter.train_model import clean_data
 BASE_DIR = Path(__file__).resolve(strict=True).parent
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
@@ -25,7 +25,7 @@ cat_features = [
 
 @pytest.fixture(scope="module")
 def test_data():
-    full_input_path = Path(BASE_DIR).joinpath(f"../starter/data/census.csv")
+    full_input_path = Path(BASE_DIR).joinpath(f"../data/census.csv")
     data = None
     try:
         data = pd.read_csv(full_input_path)
