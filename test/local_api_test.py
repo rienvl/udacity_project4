@@ -6,8 +6,8 @@ from pathlib import Path
 import json
 from fastapi.testclient import TestClient  # import the TestClient class
 from pydantic import ValidationError
-from .main import app, InputX  # , NumpyArray, NumpyEncoder, AnyJsonModel, ConstrainedJsonModel
-from .starter.train_model import load_data
+from ..starter.main import app, InputX  # , NumpyArray, NumpyEncoder, AnyJsonModel, ConstrainedJsonModel
+from ..starter.starter.train_model import load_data
 BASE_DIR = Path(__file__).resolve(strict=True).parent
 
 # Instantiate the testing client with our app

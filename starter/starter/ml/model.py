@@ -150,7 +150,7 @@ def get_model_performance_on_slices(X_val, y_val, cat_features, model, encoder):
     precision_list = []
     recall_list = []
     full_path = Path(BASE_DIR).joinpath(f"../../../project_output_files/slice_output.txt")
-    with open(full_path, 'a') as file:
+    with open(full_path, 'w') as file:
         for idx, column in enumerate(slice_cat):
             column_idx = n_continuous + idx
             f1 = np.NaN  # initialize as nan
