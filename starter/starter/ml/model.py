@@ -113,7 +113,7 @@ def compute_model_metrics(y, predict):
     precision : float
     recall : float
     """
-    f1 = f1_score(y, predict, zero_division=np.NaN)
+    f1 = f1_score(y, predict, zero_division=np.nan)
     precision = precision_score(y, predict, zero_division=1)
     recall = recall_score(y, predict, zero_division=1)
 
@@ -153,7 +153,7 @@ def get_model_performance_on_slices(X_val, y_val, cat_features, model, encoder):
     with open(full_path, 'w') as file:
         for idx, column in enumerate(slice_cat):
             column_idx = n_continuous + idx
-            f1 = np.NaN  # initialize as nan
+            f1 = np.nan  # initialize as nan
             if np.count_nonzero(X_val[:, column_idx]) > 10:
                 # only compute f1 score if sufficient samples
                 y_val_sub = y_val[X_val[:, column_idx] > 0]
