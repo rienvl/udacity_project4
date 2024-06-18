@@ -119,6 +119,34 @@ def test_api_locally_post_check_proba_type():
     assert isinstance(r.json()["predict_proba_0"], float)
 
 
+def test_api_locally_post_predict_0():
+    ''' function should return 0 '''
+    # load test dataframe
+    data_df = load_test_data()
+    # select first data sample
+    x_df = data_df.iloc[8, :].to_dict()  # 8: sample with low proba0
+    # json
+    data = json.dumps({"json_obj": x_df})
+    # api call
+    r = client.post("/inference", data=data)
+
+    assert r.json()["predict"] == 1
+
+
+def test_api_locally_post_predict_1():
+    ''' function should return 1 '''
+    # load test dataframe
+    data_df = load_test_data()
+    # select first data sample
+    x_df = data_df.iloc[4, :].to_dict()  # 4: sample with high proba0
+    # json
+    data = json.dumps({"json_obj": x_df})
+    # api call
+    r = client.post("/inference", data=data)
+
+    assert r.json()["predict"] == 0
+
+
 if __name__ == '__main__':
     test_api_locally_get_root_status()
     print('OK - test_api_locally_get_root_status()\n')
@@ -140,3 +168,9 @@ if __name__ == '__main__':
 
     test_api_locally_post_check_proba_type()
     print('OK - test_api_locally_post_check_proba_type()\n')
+
+    test_api_locally_post_predict_0()
+    print('OK - test_api_locally_post_predict_0()\n')
+
+    test_api_locally_post_predict_1()
+    print('OK - test_api_locally_post_predict_1()\n')
